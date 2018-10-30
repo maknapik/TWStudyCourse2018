@@ -1,50 +1,58 @@
 import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class PC {
+class PC {
 
-    LinkedList<Integer> list = new LinkedList<>();
-    int capacity = 2;
+    private Queue<Integer> list = new LinkedList<>();
+    private int capacity = 10;
 
-    public void produce() throws InterruptedException
+    private Lock lock = new ReentrantLock();
+    private Condition isEmpty = lock.newCondition();
+    private Condition isFull = lock.newCondition();
+
+    void produce(int index) throws InterruptedException
     {
         int value = 0;
         while (true)
         {
-            synchronized (this)
-            {
-                while (list.size() == capacity) {
-                    wait();
-                }
+            lock.lock();
 
-                System.out.println("Producer produced - " + value);
-
-                list.add(value++);
-
-                notify();
-
-                Thread.sleep(500);
+            while (list.size() == capacity) {
+                System.out.println(String.format("Producer %d is waiting", index));
+                isEmpty.await();
             }
+
+            System.out.println(String.format("Producer %d produced - %d", index, value));
+
+            list.add(value++);
+
+            isFull.signal();
+
+            lock.unlock();
         }
     }
 
-    public void consume() throws InterruptedException
+    void consume(int index) throws InterruptedException
     {
         while (true)
         {
-            synchronized (this)
-            {
-                while (list.size() == 0) {
-                    wait();
-                }
+            lock.lock();
 
-                int val = list.removeFirst();
-
-                System.out.println("Consumer consumed - " + val);
-
-                notify();
-
-                Thread.sleep(500);
+            while (list.size() == 0) {
+                System.out.println(String.format("Consumer %d is waiting", index));
+                isFull.await();
             }
+
+            int val = list.poll();
+
+            System.out.println(String.format("Consumer %d consumed - %d", index, val));
+
+            isEmpty.signal();
+
+            lock.unlock();
         }
     }
 }

@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class Main {
 
     public static void main(String args[]) throws InterruptedException {
@@ -41,33 +44,32 @@ public class Main {
         }*/
 
         final PC pc = new PC();
+        List<Thread> threads = new ArrayList<>();
 
-        Thread t1 = new Thread(() -> {
-            try
-            {
-                pc.produce();
-            }
-            catch(InterruptedException e)
-            {
-                e.printStackTrace();
-            }
-        });
+        for(int i = 0 ; i < 100 ; i++) {
+            final int index = i;
+            threads.add(new Thread(() -> {
+                try
+                {
+                    pc.produce(index);
+                }
+                catch(InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
+            }));
 
-        Thread t2 = new Thread(() -> {
-            try
-            {
-                pc.consume();
-            }
-            catch(InterruptedException e)
-            {
-                e.printStackTrace();
-            }
-        });
+            threads.add(new Thread(() -> {
+                try {
+                    pc.consume(index);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }));
+        }
 
-        t1.start();
-        t2.start();
-
-        t1.join();
-        t2.join();
+        for (Thread thread : threads) {
+            thread.start();
+        }
     }
 }
