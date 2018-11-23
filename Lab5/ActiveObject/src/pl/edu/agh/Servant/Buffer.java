@@ -1,20 +1,21 @@
 package pl.edu.agh.Servant;
 
-import pl.edu.agh.Parameters;
-
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class Buffer {
+
+    private int capacity;
     private List<Integer> elements;
 
-    public Buffer() {
-        elements = new ArrayList<>(Parameters.CAPACITY);
+    public Buffer(int capacity) {
+        this.capacity = capacity;
+        elements = new ArrayList<>(capacity);
     }
 
     public void put(List<Integer> elementsToAdd) {
-        if(elements.size() + elementsToAdd.size() > Parameters.CAPACITY) {
+        if(elements.size() + elementsToAdd.size() > capacity) {
             System.out.println("There is no enough space in buffer");
         } else {
             elements.addAll(elementsToAdd);
@@ -31,7 +32,6 @@ public class Buffer {
             for(int i = 0 ; i < amount ; i++) {
                 elementsToReturn.add(elements.remove(0));
             }
-
             return elementsToReturn;
         }
     }
@@ -41,6 +41,6 @@ public class Buffer {
     }
 
     public int capacity() {
-        return Parameters.CAPACITY;
+        return capacity;
     }
 }

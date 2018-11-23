@@ -18,6 +18,11 @@ public class PutRequest implements IRequest {
     }
 
     @Override
+    public void present() {
+        System.out.println("Put " + elementsToAdd.size());
+    }
+
+    @Override
     public boolean guard() {
         return servant.size() + elementsToAdd.size() > servant.capacity();
     }

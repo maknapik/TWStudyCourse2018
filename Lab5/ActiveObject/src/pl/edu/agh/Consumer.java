@@ -12,13 +12,15 @@ public class Consumer implements Runnable {
     private Proxy proxy;
     private List<IFuture> results;
     private int elementsToConsume;
+    private int id;
 
-    public Consumer(Proxy proxy) {
+    public Consumer(Proxy proxy, int elementsToConsume, int id) {
         this.proxy = proxy;
 
         results = new ArrayList<>();
 
-        elementsToConsume = ThreadLocalRandom.current().nextInt(1, Parameters.MAX_CONSUME_AMOUNT + 1);
+        this.elementsToConsume = elementsToConsume;
+        this.id = id;
     }
 
     @Override
@@ -42,7 +44,8 @@ public class Consumer implements Runnable {
         while(iterator.hasNext()) {
             IFuture result = iterator.next();
             if(result.ready()) {
-                System.out.println("Consumed: " + result.take());
+                List<Integer> list = (List<Integer>) result.take();
+                //System.out.println("\tConsumed [" + id + "]: " + list.size());
                 iterator.remove();
             }
         }

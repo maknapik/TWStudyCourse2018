@@ -6,7 +6,7 @@ public class Parameters {
 
     public static final int MAX_PRODUCE_AMOUNT = 6;
 
-    public static final int MAX_CONSUME_AMOUNT = 4;
+    public static final int MAX_CONSUME_AMOUNT = 8;
 
     public static final int PRODUCERS_AMOUNT = 100;
 

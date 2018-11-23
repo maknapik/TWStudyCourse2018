@@ -15,19 +15,20 @@ public class Proxy {
     private Scheduler scheduler;
     private Buffer servant;
 
-    public Proxy() {
+    public Proxy(int capacity) {
         scheduler = new Scheduler();
-        servant = new Buffer();
-
+        servant = new Buffer(capacity);
         Thread schedulerThread = new Thread(() -> {
             while(true) {
                 scheduler.dispatch();
             }
         });
+
+        schedulerThread.setDaemon(true);
         schedulerThread.start();
     }
 
-    public IFuture put(List<Integer> elements) {
+    IFuture put(List<Integer> elements) {
         PutFuture result = new PutFuture();
         PutRequest request = new PutRequest(servant, result, elements);
 

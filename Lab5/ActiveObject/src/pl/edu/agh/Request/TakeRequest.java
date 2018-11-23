@@ -24,4 +24,9 @@ public class TakeRequest implements IRequest {
     public void call() {
         result.set(servant.take(amount));
     }
+
+    @Override
+    public void present() {
+        System.out.println("Take " + amount);
+    }
 }

@@ -1,6 +1,7 @@
 package pl.edu.agh.ActivationQueue;
 
 import pl.edu.agh.Request.IRequest;
+import pl.edu.agh.Request.PutRequest;
 import pl.edu.agh.Request.TakeRequest;
 
 import java.util.ArrayList;
@@ -29,52 +30,44 @@ public class ActivationQueue {
         lastRequestType = RequestType.PUT;
     }
 
-    public void enqueue(IRequest request) {
-        lock.lock();
-
+    public synchronized void enqueue(IRequest request) {
         if(request instanceof TakeRequest) {
             takeRequests.add(request);
-        } else {
+        } else if (request instanceof PutRequest) {
             putRequests.add(request);
+        } else {
+            throw new IllegalArgumentException();
         }
 
-        queueEmpty.signal();
-
-        lock.unlock();
+        notify();
     }
 
-    public void enqueueBack(IRequest request) {
-        lock.lock();
-
+    public synchronized void enqueueBack(IRequest request) {
         if(request instanceof TakeRequest) {
-            takeRequests.add(request);
-
-            IRequest requestToMove = takeRequests.remove(0);
-            takeRequests.add(requestToMove);
+            takeRequests.add(0, request);
         } else {
-            putRequests.add(request);
-
-            IRequest requestToMove = putRequests.remove(0);
-            putRequests.add(requestToMove);
+            putRequests.add(0, request);
         }
 
-        queueEmpty.signal();
-
-        lock.unlock();
+        notify();
     }
 
-    public IRequest dequeue() {
-        lock.lock();
-
+    public synchronized IRequest dequeue() {
         while(isEmpty()) {
             try {
-                queueEmpty.await();
+                wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
 
-        lock.unlock();
+        if(!takeRequests.isEmpty() && putRequests.isEmpty()) {
+            return takeRequests.remove(0);
+        }
+
+        if(!putRequests.isEmpty() && takeRequests.isEmpty()) {
+            return putRequests.remove(0);
+        }
 
         if(lastRequestType == RequestType.PUT) {
             if(!takeRequests.isEmpty()) {

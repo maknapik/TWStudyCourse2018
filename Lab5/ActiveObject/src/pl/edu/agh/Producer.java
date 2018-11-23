@@ -12,13 +12,15 @@ public class Producer implements Runnable {
     private Proxy proxy;
     private List<IFuture> results;
     private int elementsToProduce;
+    private int id;
 
-    public Producer(Proxy proxy) {
+    public Producer(Proxy proxy, int elementsToProduce, int id) {
         this.proxy = proxy;
 
         results = new ArrayList<>();
 
-        elementsToProduce = ThreadLocalRandom.current().nextInt(1, Parameters.MAX_PRODUCE_AMOUNT + 1);
+        this.elementsToProduce = elementsToProduce;
+        this.id = id;
     }
 
     @Override
@@ -33,12 +35,12 @@ public class Producer implements Runnable {
 
             results.add(proxy.put(elements));
 
-            elementsToProduce -= elements.size();
+            elementsToProduce -= amount;
         }
 
         while(!results.isEmpty()) {
             checkResults();
-        };
+        }
     }
 
     private void checkResults() {
@@ -46,7 +48,7 @@ public class Producer implements Runnable {
         while(iterator.hasNext()) {
             IFuture result = iterator.next();
             if(result.ready()) {
-                System.out.println("Produced: " + result.take());
+                //System.out.println("Produced [" + id + "]: " + result.take());
                 iterator.remove();
             }
         }

@@ -23,6 +23,7 @@ public class Scheduler {
         }
 
         if(!request.guard()) {
+            //request.present();
             request.call();
         } else {
             queue.enqueueBack(request);
