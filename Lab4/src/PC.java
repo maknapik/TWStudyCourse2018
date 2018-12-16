@@ -11,6 +11,9 @@ class PC {
     private Condition pierw_kons = lock.newCondition();
     private Condition reszt_kons = lock.newCondition();
 
+    private boolean has_pierw_prod;
+    private boolean has_pierw_kons;
+
     PC() {
         actual_amount = 0;
     }
@@ -22,9 +25,12 @@ class PC {
     void produce(int amount) throws InterruptedException {
         lock.lock();
 
-        if (lock.hasWaiters(pierw_prod)) {
+        while(has_pierw_prod) {
             reszt_prod.await();
         }
+
+        has_pierw_prod = true;
+
         while (M*2 - actual_amount < amount) {
             pierw_prod.await();
         }
@@ -34,17 +40,22 @@ class PC {
         System.out.println("Added: " + amount + ", buffer: " + actual_amount);
 
         reszt_prod.signal();
+
         pierw_kons.signal();
 
+        has_pierw_prod = false;
         lock.unlock();
     }
 
     void consume(int amount) throws InterruptedException {
         lock.lock();
 
-        if (lock.hasWaiters(pierw_kons)) {
+        while(has_pierw_kons) {
             reszt_kons.await();
         }
+
+        has_pierw_kons = true;
+
         while (actual_amount < amount) {
             pierw_kons.await();
         }
@@ -54,8 +65,10 @@ class PC {
         System.out.println("Taken " + amount + ", buffer: " + actual_amount);
 
         reszt_kons.signal();
+
         pierw_prod.signal();
 
+        has_pierw_kons = false;
         lock.unlock();
     }
 }

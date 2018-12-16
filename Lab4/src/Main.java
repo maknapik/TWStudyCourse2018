@@ -2,12 +2,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
+
     public static void main(String args[]) {
 //        PC2V2();
-        PC2V2V2();
-//        PC();
+//        PC2V2V2();
+        PC();
     }
-    public static void PC() {
+
+    private static void PC() {
         final PC pc = new PC();
         List<Thread> threads = new ArrayList<>();
 
